@@ -119,6 +119,14 @@ onMounted(async () => {
               >
                 Tasks
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                @click="router.push('/kanban')"
+                :class="{ 'bg-accent': router.currentRoute.value.path === '/kanban' }"
+              >
+                Kanban
+              </Button>
             </nav>
           </div>
           <div class="flex items-center gap-4">

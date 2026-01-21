@@ -105,6 +105,14 @@ const handlePageChange = (page) => {
               >
                 Tasks
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                @click="router.push('/kanban')"
+                :class="{ 'bg-accent': router.currentRoute.value.path === '/kanban' }"
+              >
+                Kanban
+              </Button>
             </nav>
           </div>
           <Button @click="handleCreate">
