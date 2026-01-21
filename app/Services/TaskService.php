@@ -107,15 +107,4 @@ class TaskService
     {
         return $this->taskRepository->delete($id);
     }
-
-    /**
-     * Validate MongoDB ObjectId format
-     *
-     * @param string $id
-     * @return bool
-     */
-    public function isValidObjectId(string $id): bool
-    {
-        return preg_match('/^[a-f\d]{24}$/i', $id) === 1;
-    }
 }

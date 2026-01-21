@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ValidationHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
@@ -81,12 +82,13 @@ class TaskController extends Controller
     /**
      * Display the specified task.
      * 
+     * @param Request $request
      * @param string $id
      * @return JsonResponse
      */
-    public function show(string $id): JsonResponse
+    public function show(Request $request, string $id): JsonResponse
     {
-        if (!$this->taskService->isValidObjectId($id)) {
+        if (!ValidationHelper::isValidMongoObjectId($id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid task ID format',
@@ -118,7 +120,7 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, string $id): JsonResponse
     {
-        if (!$this->taskService->isValidObjectId($id)) {
+        if (!ValidationHelper::isValidMongoObjectId($id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid task ID format',
@@ -144,12 +146,13 @@ class TaskController extends Controller
     /**
      * Remove the specified task.
      * 
+     * @param Request $request
      * @param string $id
      * @return JsonResponse
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
-        if (!$this->taskService->isValidObjectId($id)) {
+        if (!ValidationHelper::isValidMongoObjectId($id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid task ID format',
