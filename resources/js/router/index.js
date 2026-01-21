@@ -23,6 +23,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/kanban',
+      name: 'kanban',
+      component: () => import('../views/KanbanView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/',
       redirect: '/dashboard',
     },
