@@ -7,13 +7,14 @@ import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useTaskStore } from '../stores/task'
+import AppHeader from '../components/AppHeader.vue'
 import Button from '../components/ui/button.vue'
 import Card from '../components/ui/card.vue'
 import CardHeader from '../components/ui/card-header.vue'
 import CardTitle from '../components/ui/card-title.vue'
 import CardContent from '../components/ui/card-content.vue'
 import Badge from '../components/ui/badge.vue'
-import { LogOut, User, CheckCircle2, Clock, AlertCircle, ListTodo, ArrowRight, Loader2, Calendar, AlertTriangle } from 'lucide-vue-next'
+import { CheckCircle2, Clock, AlertCircle, ListTodo, ArrowRight, Loader2, Calendar, AlertTriangle } from 'lucide-vue-next'
 import { useTaskConstants } from '../composables/useTaskConstants'
 import { useDateFormat } from '../composables/useDateFormat'
 
@@ -22,10 +23,6 @@ const authStore = useAuthStore()
 const taskStore = useTaskStore()
 const { getStatusColor, getPriorityColor, getStatusLabel, getPriorityLabel } = useTaskConstants()
 const { formatDate } = useDateFormat()
-
-const handleLogout = async () => {
-  await authStore.logout()
-}
 
 // Helper function to check if date is today
 const isToday = (dateString) => {
@@ -96,52 +93,7 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-    <!-- Header -->
-    <header class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center gap-6">
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-            <nav class="hidden md:flex gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="router.push('/dashboard')"
-                :class="{ 'bg-accent': router.currentRoute.value.path === '/dashboard' }"
-              >
-                Dashboard
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="router.push('/tasks')"
-                :class="{ 'bg-accent': router.currentRoute.value.path === '/tasks' }"
-              >
-                Tasks
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="router.push('/kanban')"
-                :class="{ 'bg-accent': router.currentRoute.value.path === '/kanban' }"
-              >
-                Kanban
-              </Button>
-            </nav>
-          </div>
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-              <User class="h-4 w-4" />
-              <span class="hidden sm:inline">{{ authStore.user?.name || authStore.user?.email }}</span>
-            </div>
-            <Button @click="handleLogout" variant="outline" size="sm">
-              <LogOut class="mr-2 h-4 w-4" />
-              <span class="hidden sm:inline">Logout</span>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </header>
+    <AppHeader title="Dashboard" />
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

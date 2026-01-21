@@ -6,17 +6,26 @@ import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useTaskStore } from '../stores/task'
+import AppHeader from '../components/AppHeader.vue'
 import Button from '../components/ui/button.vue'
 import Card from '../components/ui/card.vue'
 import Badge from '../components/ui/badge.vue'
-import { LogOut, User, Loader2, ArrowLeft } from 'lucide-vue-next'
+import Dialog from '../components/ui/dialog.vue'
+import DialogHeader from '../components/ui/dialog-header.vue'
+import DialogTitle from '../components/ui/dialog-title.vue'
+import DialogContent from '../components/ui/dialog-content.vue'
+import DialogClose from '../components/ui/dialog-close.vue'
+import TaskForm from '../components/TaskForm.vue'
+import { Loader2, Plus } from 'lucide-vue-next'
+import { useDialog } from '../composables/useDialog'
 import { useTaskConstants } from '../composables/useTaskConstants'
 import { useDateFormat } from '../composables/useDateFormat'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const taskStore = useTaskStore()
-const { getStatusColor, getPriorityColor, getStatusLabel, getPriorityLabel, statusOptions } = useTaskConstants()
+const { isOpen: showDialog, data: editingTask, open: openDialog, close: closeDialog } = useDialog()
+const { getStatusColor, getPriorityColor, getStatusLabel, getPriorityLabel } = useTaskConstants()
 const { formatDate } = useDateFormat()
 
 // Group tasks by status
@@ -101,6 +110,31 @@ const handleStatusClick = async (task, newStatus) => {
   }
 }
 
+// Handle create new task
+const handleCreate = () => {
+  openDialog(null)
+}
+
+// Handle submit task form
+const handleSubmit = async (formData) => {
+  let result
+  if (editingTask.value) {
+    result = await taskStore.updateTask(editingTask.value._id, formData)
+  } else {
+    result = await taskStore.createTask(formData)
+  }
+
+  if (result.success) {
+    closeDialog()
+    await taskStore.fetchTasks(taskStore.currentPage)
+  }
+}
+
+// Handle cancel task form
+const handleCancel = () => {
+  closeDialog()
+}
+
 onMounted(async () => {
   if (!authStore.isAuthenticated) {
     router.push('/login')
@@ -113,60 +147,14 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-    <!-- Header -->
-    <header class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center gap-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              @click="router.push('/dashboard')"
-            >
-              <ArrowLeft class="mr-2 h-4 w-4" />
-              Back
-            </Button>
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Kanban Board</h1>
-            <nav class="hidden md:flex gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="router.push('/dashboard')"
-                :class="{ 'bg-accent': router.currentRoute.value.path === '/dashboard' }"
-              >
-                Dashboard
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="router.push('/tasks')"
-                :class="{ 'bg-accent': router.currentRoute.value.path === '/tasks' }"
-              >
-                Tasks
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="router.push('/kanban')"
-                :class="{ 'bg-accent': router.currentRoute.value.path === '/kanban' }"
-              >
-                Kanban
-              </Button>
-            </nav>
-          </div>
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-              <User class="h-4 w-4" />
-              <span class="hidden sm:inline">{{ authStore.user?.name || authStore.user?.email }}</span>
-            </div>
-            <Button @click="authStore.logout()" variant="outline" size="sm">
-              <LogOut class="mr-2 h-4 w-4" />
-              <span class="hidden sm:inline">Logout</span>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </header>
+    <AppHeader title="Kanban Board" :show-back-button="true">
+      <template #actions>
+        <Button @click="handleCreate">
+          <Plus class="mr-2 h-4 w-4" />
+          <span class="hidden sm:inline">New Task</span>
+        </Button>
+      </template>
+    </AppHeader>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -376,5 +364,21 @@ onMounted(async () => {
         </div>
       </div>
     </main>
+
+    <!-- Create/Edit Dialog -->
+    <Dialog v-model="showDialog">
+      <DialogHeader>
+        <DialogTitle>{{ editingTask ? 'Edit Task' : 'Create New Task' }}</DialogTitle>
+        <DialogClose @click="handleCancel" />
+      </DialogHeader>
+      <DialogContent>
+        <TaskForm
+          :task="editingTask"
+          :loading="taskStore.loading"
+          @submit="handleSubmit"
+          @cancel="handleCancel"
+        />
+      </DialogContent>
+    </Dialog>
   </div>
 </template>

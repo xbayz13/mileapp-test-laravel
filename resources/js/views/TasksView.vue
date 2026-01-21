@@ -6,6 +6,7 @@
 import { onMounted } from 'vue'
 import { useTaskStore } from '../stores/task'
 import { useRouter } from 'vue-router'
+import AppHeader from '../components/AppHeader.vue'
 import Button from '../components/ui/button.vue'
 import Card from '../components/ui/card.vue'
 import CardHeader from '../components/ui/card-header.vue'
@@ -82,46 +83,14 @@ const handlePageChange = (page) => {
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-    <!-- Header -->
-    <header class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center gap-6">
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Tasks</h1>
-            <nav class="hidden md:flex gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="router.push('/dashboard')"
-                :class="{ 'bg-accent': router.currentRoute.value.path === '/dashboard' }"
-              >
-                Dashboard
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="router.push('/tasks')"
-                :class="{ 'bg-accent': router.currentRoute.value.path === '/tasks' }"
-              >
-                Tasks
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                @click="router.push('/kanban')"
-                :class="{ 'bg-accent': router.currentRoute.value.path === '/kanban' }"
-              >
-                Kanban
-              </Button>
-            </nav>
-          </div>
-          <Button @click="handleCreate">
-            <Plus class="mr-2 h-4 w-4" />
-            <span class="hidden sm:inline">New Task</span>
-          </Button>
-        </div>
-      </div>
-    </header>
+    <AppHeader title="Tasks">
+      <template #actions>
+        <Button @click="handleCreate">
+          <Plus class="mr-2 h-4 w-4" />
+          <span class="hidden sm:inline">New Task</span>
+        </Button>
+      </template>
+    </AppHeader>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
