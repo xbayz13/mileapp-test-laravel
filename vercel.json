@@ -28,11 +28,5 @@
   ],
   "env": {
     "APP_ENV": "production"
-  },
-  "functions": {
-    "public/index.php": {
-      "maxDuration": 30,
-      "memory": 1024
-    }
   }
 }
