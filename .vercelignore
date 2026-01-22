@@ -11,10 +11,4 @@ tests
 .phpunit.result.cache
 .editorconfig
 .gitattributes
-README.md
-vite.config.js
-package.json
-package-lock.json
-composer.lock
-phpunit.xml
 *.md
