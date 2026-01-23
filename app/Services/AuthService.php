@@ -10,6 +10,41 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class AuthService
 {
     /**
+     * Register a new user and generate JWT token
+     *
+     * @param string $name
+     * @param string $email
+     * @param string $password
+     * @return array|null
+     */
+    public function register(string $name, string $email, string $password): ?array
+    {
+        try {
+            $user = User::create([
+                'name' => $name,
+                'email' => $email,
+                'password' => Hash::make($password),
+            ]);
+
+            $token = JWTAuth::fromUser($user);
+            $expiresIn = config('jwt.ttl') * 60;
+
+            return [
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'expires_in' => $expiresIn,
+                'user' => [
+                    'id' => (string) $user->_id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+            ];
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
      * Authenticate user and generate JWT token
      *
      * @param string $email

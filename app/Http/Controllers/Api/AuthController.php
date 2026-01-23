@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 
@@ -12,6 +13,34 @@ class AuthController extends Controller
     public function __construct(
         private AuthService $authService
     ) {
+    }
+
+    /**
+     * Register endpoint - creates new user and returns JWT token
+     * 
+     * @param RegisterRequest $request
+     * @return JsonResponse
+     */
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $tokenData = $this->authService->register(
+            $request->input('name'),
+            $request->input('email'),
+            $request->input('password')
+        );
+
+        if (!$tokenData) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Registration failed. Please try again.',
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration successful',
+            'data' => $tokenData,
+        ], 201);
     }
 
     /**
