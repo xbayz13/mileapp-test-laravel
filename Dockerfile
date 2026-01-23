@@ -62,6 +62,11 @@ COPY composer*.json ./
 # Copy application files (needed for composer post-install scripts)
 COPY . .
 
+# Create necessary directories and set permissions before composer install
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 bootstrap/cache storage
+
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
