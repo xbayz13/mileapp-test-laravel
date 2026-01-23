@@ -116,6 +116,23 @@ db/
 
 ## Installation
 
+### Docker Setup (Recommended)
+
+```bash
+# Development setup dengan Vite dev server
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+# Setup Laravel
+docker exec laravel_app php artisan key:generate
+docker exec laravel_app php artisan migrate
+
+# Access application
+# Web: http://localhost:8000
+# Vite: http://localhost:5173
+```
+
+### Manual Setup
+
 ```bash
 # Install dependencies
 composer install
@@ -138,6 +155,46 @@ npm run build
 php artisan serve
 npm run dev
 ```
+
+## Docker Commands Quick Reference
+
+### Development
+
+```bash
+# Start services
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+# Stop services
+docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+
+# Restart services
+docker compose -f docker-compose.yml -f docker-compose.dev.yml restart
+
+# View logs
+docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f
+
+# Clear cache
+docker exec laravel_app php artisan optimize:clear
+
+# Update dependencies
+docker exec laravel_app composer install
+docker exec laravel_node npm install
+```
+
+### Production
+
+```bash
+# Build & start
+docker compose build
+docker compose up -d
+
+# Update code
+docker compose build --no-cache
+docker compose down && docker compose up -d
+docker exec laravel_app php artisan migrate --force
+docker exec laravel_app php artisan config:cache
+```
+
 
 ## License
 
