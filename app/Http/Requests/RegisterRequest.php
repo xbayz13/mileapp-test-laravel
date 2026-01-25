@@ -28,7 +28,7 @@ class RegisterRequest extends BaseFormRequest
                 'required',
                 'email',
                 'max:255',
-                Rule::unique((new User)->getTable(), 'email'),
+                Rule::unique('users', 'email'),
             ],
             'password' => 'required|string|min:6|confirmed',
         ];

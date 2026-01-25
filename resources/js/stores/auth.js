@@ -34,22 +34,27 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (err) {
       // Extract error message from various error formats
       let errorMessage = 'Registration failed. Please try again.'
-      
-      if (err.response?.data) {
-        // Laravel validation errors
+      let errors = null
+
+      if (err.errors) {
+        errors = err.errors
+        const first = Object.values(errors)[0]
+        errorMessage = Array.isArray(first) ? first[0] : first
+      } else if (err.response?.data) {
         if (err.response.data.errors) {
-          const errorFields = Object.keys(err.response.data.errors)
-          errorMessage = err.response.data.errors[errorFields[0]][0] || err.response.data.message || errorMessage
+          errors = err.response.data.errors
+          const errorFields = Object.keys(errors)
+          errorMessage = errors[errorFields[0]][0] || err.response.data.message || errorMessage
         } else {
           errorMessage = err.response.data.message || errorMessage
         }
       } else if (err.message) {
         errorMessage = err.message
       }
-      
+
       error.value = errorMessage
       console.error('Registration error:', err)
-      return { success: false, error: errorMessage }
+      return { success: false, error: errorMessage, errors }
     } finally {
       loading.value = false
     }

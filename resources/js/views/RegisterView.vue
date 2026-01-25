@@ -70,6 +70,12 @@ const handleSubmit = async (e) => {
   if (result.success) {
     router.push('/dashboard')
   } else {
+    if (result.errors) {
+      for (const [field, messages] of Object.entries(result.errors)) {
+        const msg = Array.isArray(messages) ? messages[0] : messages
+        if (msg) formErrors.value[field] = msg
+      }
+    }
     formErrors.value.general = result.error || 'Registration failed. Please try again.'
   }
 }

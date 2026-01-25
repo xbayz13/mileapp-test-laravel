@@ -25,11 +25,13 @@ export const authService = {
         // Server responded with error status
         const responseData = error.response.data
         
-        // Handle validation errors (422)
+        // Handle validation errors (422) – attach errors agar bisa di-map per field
         if (error.response.status === 422 && responseData.errors) {
           const firstError = Object.values(responseData.errors)[0]
           const errorMessage = Array.isArray(firstError) ? firstError[0] : firstError
-          throw new Error(errorMessage || responseData.message || 'Validation failed')
+          const err = new Error(errorMessage || responseData.message || 'Validation failed')
+          err.errors = responseData.errors
+          throw err
         }
         
         // Handle other errors

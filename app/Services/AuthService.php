@@ -19,11 +19,18 @@ class AuthService
      */
     public function register(string $name, string $email, string $password): ?array
     {
+        $existingUser = User::where('email', $email)->first();
+        if ($existingUser) {
+            return null;
+        }
+
+        $user = null;
+
         try {
             $user = User::create([
                 'name' => $name,
                 'email' => $email,
-                'password' => Hash::make($password),
+                'password' => $password,
             ]);
 
             $token = JWTAuth::fromUser($user);
@@ -40,6 +47,12 @@ class AuthService
                 ],
             ];
         } catch (\Exception $e) {
+            if ($user !== null) {
+                try {
+                    $user->delete();
+                } catch (\Throwable $rollbackEx) {
+                }
+            }
             return null;
         }
     }
