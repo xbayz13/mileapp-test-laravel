@@ -26,16 +26,19 @@ class TaskController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $user = auth('api')->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+        $userId = (string) $user->_id;
+
         $filters = [];
-        
         if ($request->has('status')) {
             $filters['status'] = $request->input('status');
         }
-        
         if ($request->has('priority')) {
             $filters['priority'] = $request->input('priority');
         }
-        
         if ($request->has('search')) {
             $filters['search'] = $request->input('search');
         }
@@ -45,7 +48,7 @@ class TaskController extends Controller
         $perPage = (int) $request->input('per_page', 15);
         $page = (int) $request->input('page', 1);
 
-        $tasks = $this->taskService->getAllTasks($filters, $sortBy, $sortDir, $perPage, $page);
+        $tasks = $this->taskService->getAllTasks($userId, $filters, $sortBy, $sortDir, $perPage, $page);
 
         return response()->json([
             'success' => true,
@@ -70,7 +73,13 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request): JsonResponse
     {
-        $task = $this->taskService->createTask($request->validated());
+        $user = auth('api')->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+        $userId = (string) $user->_id;
+
+        $task = $this->taskService->createTask($request->validated(), $userId);
 
         return response()->json([
             'success' => true,
@@ -95,7 +104,13 @@ class TaskController extends Controller
             ], 400);
         }
 
-        $task = $this->taskService->getTaskById($id);
+        $user = auth('api')->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+        $userId = (string) $user->_id;
+
+        $task = $this->taskService->getTaskById($id, $userId);
 
         if (!$task) {
             return response()->json([
@@ -127,7 +142,13 @@ class TaskController extends Controller
             ], 400);
         }
 
-        $task = $this->taskService->updateTask($id, $request->validated());
+        $user = auth('api')->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+        $userId = (string) $user->_id;
+
+        $task = $this->taskService->updateTask($id, $request->validated(), $userId);
 
         if (!$task) {
             return response()->json([
@@ -159,7 +180,13 @@ class TaskController extends Controller
             ], 400);
         }
 
-        $deleted = $this->taskService->deleteTask($id);
+        $user = auth('api')->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+        $userId = (string) $user->_id;
+
+        $deleted = $this->taskService->deleteTask($id, $userId);
 
         if (!$deleted) {
             return response()->json([

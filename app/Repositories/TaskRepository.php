@@ -11,6 +11,7 @@ class TaskRepository implements TaskRepositoryInterface
     /**
      * Get all tasks with filters, sorting, and pagination
      *
+     * @param string $userId
      * @param array $filters
      * @param string $sortBy
      * @param string $sortDir
@@ -18,9 +19,9 @@ class TaskRepository implements TaskRepositoryInterface
      * @param int $page
      * @return LengthAwarePaginator
      */
-    public function getAll(array $filters = [], string $sortBy = 'created_at', string $sortDir = 'desc', int $perPage = 15, int $page = 1): LengthAwarePaginator
+    public function getAll(string $userId, array $filters = [], string $sortBy = 'created_at', string $sortDir = 'desc', int $perPage = 15, int $page = 1): LengthAwarePaginator
     {
-        $query = Task::query();
+        $query = Task::query()->where('user_id', $userId);
 
         // Apply filters
         if (isset($filters['status'])) {
@@ -50,11 +51,12 @@ class TaskRepository implements TaskRepositoryInterface
      * Find task by ID
      *
      * @param string $id
+     * @param string $userId
      * @return Task|null
      */
-    public function findById(string $id): ?Task
+    public function findById(string $id, string $userId): ?Task
     {
-        return Task::find($id);
+        return Task::where('_id', $id)->where('user_id', $userId)->first();
     }
 
     /**
@@ -73,19 +75,17 @@ class TaskRepository implements TaskRepositoryInterface
      *
      * @param string $id
      * @param array $data
+     * @param string $userId
      * @return Task|null
      */
-    public function update(string $id, array $data): ?Task
+    public function update(string $id, array $data, string $userId): ?Task
     {
-        $task = $this->findById($id);
-        
+        $task = $this->findById($id, $userId);
         if (!$task) {
             return null;
         }
-
         $task->update($data);
         $task->refresh();
-
         return $task;
     }
 
@@ -93,16 +93,15 @@ class TaskRepository implements TaskRepositoryInterface
      * Delete a task
      *
      * @param string $id
+     * @param string $userId
      * @return bool
      */
-    public function delete(string $id): bool
+    public function delete(string $id, string $userId): bool
     {
-        $task = $this->findById($id);
-        
+        $task = $this->findById($id, $userId);
         if (!$task) {
             return false;
         }
-
         return $task->delete();
     }
 }

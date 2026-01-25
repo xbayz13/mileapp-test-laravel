@@ -20,6 +20,7 @@ class TaskFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => null,
             'title' => $this->faker->sentence(4),
             'description' => $this->faker->paragraph(),
             'status' => $this->faker->randomElement(['pending', 'in_progress', 'completed']),
@@ -27,5 +28,10 @@ class TaskFactory extends Factory
             'due_date' => $this->faker->optional()->dateTimeBetween('now', '+1 month'),
             'completed_at' => null,
         ];
+    }
+
+    public function forUser(string $userId): static
+    {
+        return $this->state(fn (array $attrs) => ['user_id' => $userId]);
     }
 }

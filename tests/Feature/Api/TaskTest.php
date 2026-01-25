@@ -14,11 +14,11 @@ class TaskTest extends TestCase
     use WithFaker;
 
     /**
-     * Get authenticated user token for testing
+     * Get authenticated user dan token untuk testing.
      *
-     * @return string
+     * @return array{0: string, 1: User}
      */
-    private function getAuthToken(): string
+    private function getAuthUserAndToken(): array
     {
         $user = User::firstOrCreate(
             ['email' => 'test@example.com'],
@@ -27,8 +27,8 @@ class TaskTest extends TestCase
                 'password' => Hash::make('password123'),
             ]
         );
-
-        return auth('api')->login($user);
+        $token = auth('api')->login($user);
+        return [$token, $user];
     }
 
     /**
@@ -36,10 +36,10 @@ class TaskTest extends TestCase
      */
     public function test_index_tasks(): void
     {
-        // Create some test tasks
-        Task::factory()->count(5)->create();
+        [$token, $user] = $this->getAuthUserAndToken();
+        $userId = (string) $user->_id;
+        Task::factory()->forUser($userId)->count(5)->create();
 
-        $token = $this->getAuthToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/tasks');
 
@@ -65,10 +65,11 @@ class TaskTest extends TestCase
      */
     public function test_index_tasks_filter_by_status(): void
     {
-        Task::factory()->create(['status' => 'pending']);
-        Task::factory()->create(['status' => 'completed']);
+        [$token, $user] = $this->getAuthUserAndToken();
+        $userId = (string) $user->_id;
+        Task::factory()->forUser($userId)->create(['status' => 'pending']);
+        Task::factory()->forUser($userId)->create(['status' => 'completed']);
 
-        $token = $this->getAuthToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/tasks?status=completed');
 
@@ -88,10 +89,11 @@ class TaskTest extends TestCase
      */
     public function test_index_tasks_filter_by_priority(): void
     {
-        Task::factory()->create(['priority' => 'high']);
-        Task::factory()->create(['priority' => 'low']);
+        [$token, $user] = $this->getAuthUserAndToken();
+        $userId = (string) $user->_id;
+        Task::factory()->forUser($userId)->create(['priority' => 'high']);
+        Task::factory()->forUser($userId)->create(['priority' => 'low']);
 
-        $token = $this->getAuthToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/tasks?priority=high');
 
@@ -106,10 +108,11 @@ class TaskTest extends TestCase
      */
     public function test_index_tasks_search(): void
     {
-        Task::factory()->create(['title' => 'Test Task']);
-        Task::factory()->create(['title' => 'Another Task']);
+        [$token, $user] = $this->getAuthUserAndToken();
+        $userId = (string) $user->_id;
+        Task::factory()->forUser($userId)->create(['title' => 'Test Task']);
+        Task::factory()->forUser($userId)->create(['title' => 'Another Task']);
 
-        $token = $this->getAuthToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/tasks?search=Test');
 
@@ -124,10 +127,11 @@ class TaskTest extends TestCase
      */
     public function test_index_tasks_sort(): void
     {
-        Task::factory()->create(['title' => 'A Task']);
-        Task::factory()->create(['title' => 'Z Task']);
+        [$token, $user] = $this->getAuthUserAndToken();
+        $userId = (string) $user->_id;
+        Task::factory()->forUser($userId)->create(['title' => 'A Task']);
+        Task::factory()->forUser($userId)->create(['title' => 'Z Task']);
 
-        $token = $this->getAuthToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/tasks?sort_by=title&sort_dir=asc');
 
@@ -142,9 +146,10 @@ class TaskTest extends TestCase
      */
     public function test_index_tasks_pagination(): void
     {
-        Task::factory()->count(25)->create();
+        [$token, $user] = $this->getAuthUserAndToken();
+        $userId = (string) $user->_id;
+        Task::factory()->forUser($userId)->count(25)->create();
 
-        $token = $this->getAuthToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/tasks?per_page=10&page=2');
 
@@ -170,7 +175,7 @@ class TaskTest extends TestCase
             'priority' => 'medium',
         ];
 
-        $token = $this->getAuthToken();
+        [$token, $user] = $this->getAuthUserAndToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->postJson('/api/tasks', $taskData);
 
@@ -203,7 +208,7 @@ class TaskTest extends TestCase
      */
     public function test_store_task_validation_error(): void
     {
-        $token = $this->getAuthToken();
+        [$token] = $this->getAuthUserAndToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->postJson('/api/tasks', []);
 
@@ -223,9 +228,10 @@ class TaskTest extends TestCase
      */
     public function test_show_task(): void
     {
-        $task = Task::factory()->create();
+        [$token, $user] = $this->getAuthUserAndToken();
+        $userId = (string) $user->_id;
+        $task = Task::factory()->forUser($userId)->create();
 
-        $token = $this->getAuthToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson("/api/tasks/{$task->_id}");
 
@@ -252,7 +258,7 @@ class TaskTest extends TestCase
     {
         $fakeId = '507f1f77bcf86cd799439011';
 
-        $token = $this->getAuthToken();
+        [$token] = $this->getAuthUserAndToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson("/api/tasks/{$fakeId}");
 
@@ -268,14 +274,15 @@ class TaskTest extends TestCase
      */
     public function test_update_task(): void
     {
-        $task = Task::factory()->create(['status' => 'pending']);
+        [$token, $user] = $this->getAuthUserAndToken();
+        $userId = (string) $user->_id;
+        $task = Task::factory()->forUser($userId)->create(['status' => 'pending']);
 
         $updateData = [
             'title' => 'Updated Task',
             'status' => 'in_progress',
         ];
 
-        $token = $this->getAuthToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->putJson("/api/tasks/{$task->_id}", $updateData);
 
@@ -299,9 +306,10 @@ class TaskTest extends TestCase
      */
     public function test_update_task_validation_error(): void
     {
-        $task = Task::factory()->create();
+        [$token, $user] = $this->getAuthUserAndToken();
+        $userId = (string) $user->_id;
+        $task = Task::factory()->forUser($userId)->create();
 
-        $token = $this->getAuthToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->putJson("/api/tasks/{$task->_id}", [
                 'status' => 'invalid_status',
@@ -320,7 +328,7 @@ class TaskTest extends TestCase
     {
         $fakeId = '507f1f77bcf86cd799439011';
 
-        $token = $this->getAuthToken();
+        [$token] = $this->getAuthUserAndToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->putJson("/api/tasks/{$fakeId}", [
                 'title' => 'Updated',
@@ -338,9 +346,10 @@ class TaskTest extends TestCase
      */
     public function test_destroy_task(): void
     {
-        $task = Task::factory()->create();
+        [$token, $user] = $this->getAuthUserAndToken();
+        $userId = (string) $user->_id;
+        $task = Task::factory()->forUser($userId)->create();
 
-        $token = $this->getAuthToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->deleteJson("/api/tasks/{$task->_id}");
 
@@ -360,9 +369,34 @@ class TaskTest extends TestCase
     {
         $fakeId = '507f1f77bcf86cd799439011';
 
-        $token = $this->getAuthToken();
+        [$token] = $this->getAuthUserAndToken();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->deleteJson("/api/tasks/{$fakeId}");
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Task not found',
+            ]);
+    }
+
+    /**
+     * Task milik user A tidak bisa dilihat oleh user B.
+     */
+    public function test_show_task_other_user_returns_404(): void
+    {
+        [$tokenA, $userA] = $this->getAuthUserAndToken();
+        $userIdA = (string) $userA->_id;
+        $task = Task::factory()->forUser($userIdA)->create();
+
+        $userB = User::firstOrCreate(
+            ['email' => 'other@example.com'],
+            ['name' => 'Other User', 'password' => Hash::make('password123')]
+        );
+        $tokenB = auth('api')->login($userB);
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $tokenB)
+            ->getJson("/api/tasks/{$task->_id}");
 
         $response->assertStatus(404)
             ->assertJson([

@@ -6,8 +6,76 @@
 use('task-test');
 
 // ============================================
+// Users Collection Indexes
+// ============================================
+
+// Unique index on email (for login, register, unique constraint)
+db.users.createIndex(
+    { email: 1 },
+    {
+        name: "idx_email_unique",
+        unique: true,
+        background: true
+    }
+);
+
+// Index on created_at (for sorting if listing users)
+db.users.createIndex(
+    { created_at: -1 },
+    {
+        name: "idx_created_at",
+        background: true
+    }
+);
+
+// ============================================
 // Tasks Collection Indexes
 // ============================================
+
+// Index on user_id (tasks scoped by user – always filter by user first)
+db.tasks.createIndex(
+    { user_id: 1 },
+    {
+        name: "idx_user_id",
+        background: true
+    }
+);
+
+// Compound: user_id + created_at (default list "my tasks" sorted by newest)
+db.tasks.createIndex(
+    { user_id: 1, created_at: -1 },
+    {
+        name: "idx_user_id_created_at",
+        background: true
+    }
+);
+
+// Compound: user_id + status (filter my tasks by status)
+db.tasks.createIndex(
+    { user_id: 1, status: 1 },
+    {
+        name: "idx_user_id_status",
+        background: true
+    }
+);
+
+// Compound: user_id + priority (filter my tasks by priority)
+db.tasks.createIndex(
+    { user_id: 1, priority: 1 },
+    {
+        name: "idx_user_id_priority",
+        background: true
+    }
+);
+
+// Compound: user_id + status + created_at (common filter + sort)
+db.tasks.createIndex(
+    { user_id: 1, status: 1, created_at: -1 },
+    {
+        name: "idx_user_id_status_created_at",
+        background: true
+    }
+);
 
 // Index on status field (for filtering by status)
 db.tasks.createIndex(

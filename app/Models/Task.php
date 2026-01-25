@@ -14,6 +14,7 @@ class Task extends Model
     protected $collection = 'tasks';
 
     protected $fillable = [
+        'user_id',
         'title',
         'description',
         'status',
@@ -37,6 +38,14 @@ class Task extends Model
     public function getKeyName()
     {
         return '_id';
+    }
+
+    /**
+     * The user who created the task.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', '_id');
     }
 
     /**

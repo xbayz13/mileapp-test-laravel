@@ -10,6 +10,7 @@ interface TaskRepositoryInterface
     /**
      * Get all tasks with filters, sorting, and pagination
      *
+     * @param string $userId
      * @param array $filters
      * @param string $sortBy
      * @param string $sortDir
@@ -17,15 +18,16 @@ interface TaskRepositoryInterface
      * @param int $page
      * @return LengthAwarePaginator
      */
-    public function getAll(array $filters = [], string $sortBy = 'created_at', string $sortDir = 'desc', int $perPage = 15, int $page = 1): LengthAwarePaginator;
+    public function getAll(string $userId, array $filters = [], string $sortBy = 'created_at', string $sortDir = 'desc', int $perPage = 15, int $page = 1): LengthAwarePaginator;
 
     /**
      * Find task by ID
      *
      * @param string $id
+     * @param string $userId
      * @return Task|null
      */
-    public function findById(string $id): ?Task;
+    public function findById(string $id, string $userId): ?Task;
 
     /**
      * Create a new task
@@ -40,15 +42,17 @@ interface TaskRepositoryInterface
      *
      * @param string $id
      * @param array $data
+     * @param string $userId
      * @return Task|null
      */
-    public function update(string $id, array $data): ?Task;
+    public function update(string $id, array $data, string $userId): ?Task;
 
     /**
      * Delete a task
      *
      * @param string $id
+     * @param string $userId
      * @return bool
      */
-    public function delete(string $id): bool;
+    public function delete(string $id, string $userId): bool;
 }
